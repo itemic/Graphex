@@ -31,7 +31,7 @@ struct ContentView: View {
     func intersectPoint(_ nodeA: Node, _ nodeB: Node) -> CGPoint {
         return CGPoint(x: nodeB.x + (22.5 * cos(angleOf(nodeB, nodeA))), y: nodeB.y + (22.5 * sin(angleOf(nodeB, nodeA))))
     }
-  
+    
     
     
     var body: some View {
@@ -109,12 +109,51 @@ struct ContentView: View {
                         Spacer()
                     }
                     
-                    Text("No element selected...")
+                    if (selectedNode != nil) {
+                        // node view
+                        HStack {
+                        Text("Node: \(selectedNode!.name)")
+                        Spacer()
+                            Button(action: {
+                                vm.deleteNode(selectedNode!)
+                                selectedNode = nil
+                            }) {
+                                Text("Remove").bold()
+                                    .padding()
+                                    .foregroundColor(.red)
+                                    .background(Color.red.opacity(0.2))
+                                    .cornerRadius(10)
+                            }
+                        }
+                        
+                    } else if (selectedEdge != nil) {
+                        // edge view
+                        HStack {
+                            Text("Edge \(selectedEdge!.nodeA.name) to \(selectedEdge!.nodeB.name)")
+                            Spacer()
+                            Button(action: {
+                                vm.deleteEdge(selectedEdge!)
+                                selectedEdge = nil
+                            }) {
+                                Text("Remove").bold()
+                                    .padding()
+                                    .foregroundColor(.red)
+                                    .background(Color.red.opacity(0.2))
+                                    .cornerRadius(10)
+                            }
+                        }
+                    } else {
+                        // empty
+                        Text("No element selected...")
+                    }
+                    
+                    
                     
                     Text("Nodes").font(.headline)
                     List(vm.nodes) { node in
                         Text("Node \(node.name)")
                             .foregroundColor(node == selectedNode ? .green : .primary)
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedEdge = nil
                                 selectedNode = node
@@ -124,6 +163,7 @@ struct ContentView: View {
                     List(vm.edges) { edge in
                         Text("\(edge.nodeA.name) → \(edge.nodeB.name)")
                             .foregroundColor(edge == selectedEdge ? .green : .primary)
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 selectedEdge = edge
                                 selectedNode = nil
@@ -185,6 +225,21 @@ class ViewModel: ObservableObject {
         if !edges.contains(edge) {edges.append(edge)}
     }
     
+    func deleteEdge(_ edge: Edge) {
+        edges.removeAll(where: {
+            $0 == edge
+        })
+    }
+    
+    func deleteNode(_ node: Node) {
+        edges.removeAll(where: {
+            $0.nodeA == node || $0.nodeB == node
+        })
+        
+        nodes.removeAll(where: {
+            $0 == node
+        })
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {
