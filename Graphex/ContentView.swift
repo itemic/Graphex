@@ -18,9 +18,9 @@ struct ContentView: View {
         var result = atan2(dY, dX)
         print(result)
         
-//        if result <= 0 {
-//            result += CGFloat(2.0 * Double.pi)
-//        }
+        if result <= 0 {
+            result += CGFloat(2.0 * Double.pi)
+        }
         return (result)
     }
     
@@ -29,27 +29,9 @@ struct ContentView: View {
     }
     
     func intersectPoint(_ nodeA: Node, _ nodeB: Node) -> CGPoint {
-        return CGPoint(x: nodeB.x + (20 * cos(angleOf(nodeB, nodeA))), y: nodeB.y + (20 * sin(angleOf(nodeB, nodeA))))
+        return CGPoint(x: nodeB.x + (22.5 * cos(angleOf(nodeB, nodeA))), y: nodeB.y + (22.5 * sin(angleOf(nodeB, nodeA))))
     }
-    
-    func drawArrow(_ point: CGPoint, _ angle: CGFloat) -> CGPoint {
-        var x = point.x
-        var y = point.y
-        
-        if (angle <= 0) {
-            x -= 50
-            y -= 50
-        } else {
-            x += 50
-            y += 50
-        }
-        
-//        x += 50 * cos(angle)
-//        y += 520 * sin(angle)
-//        y += 50 * sin(20 * CGFloat.pi)
-        print("x = \(x)")
-        return CGPoint(x: x, y: y)
-    }
+  
     
     
     var body: some View {
@@ -63,10 +45,7 @@ struct ContentView: View {
                 ForEach(vm.edges) { edge in
                     Path { path in
                         path.move(to: CGPoint(x: edge.nodeA.x, y: edge.nodeA.y))
-//                        path.addLine(to: CGPoint(x: edge.nodeB.x, y: edge.nodeB.y))
                         path.addLine(to: intersectPoint(edge.nodeA, edge.nodeB))
-                        
-//                        path.addLine(to: drawArrow(intersectPoint(edge.nodeA, edge.nodeB), angleOf(edge.nodeB, edge.nodeA)))
                         
                         
                     }
@@ -75,12 +54,17 @@ struct ContentView: View {
                         selectedEdge = edge
                         selectedNode = nil
                     }
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: 20)
+                        .overlay(Image(systemName: "triangle.fill").foregroundColor(selectedEdge == edge ? .blue : .black).rotationEffect(Angle(radians: (Double.pi/2.0) + Double(angleOf(edge.nodeA, edge.nodeB)) )))
+                        .position(x: intersectPoint(edge.nodeA, edge.nodeB).x, y: intersectPoint(edge.nodeA, edge.nodeB).y)
                 }
                 
                 //MARK: NODES
                 ForEach(vm.nodes) { node in
                     Circle()
-                        .fill(Color.white.opacity(0.5))
+                        .fill(Color.white)
                         .frame(width: CGFloat(vm.nodeSize), height: CGFloat(vm.nodeSize))
                         .overlay(Circle().stroke(selectedNode == node ? Color.blue : Color.black, lineWidth: 5))
                         .position(x: node.x, y: CGFloat(node.y))
